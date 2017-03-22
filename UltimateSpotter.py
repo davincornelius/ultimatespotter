@@ -1,7 +1,8 @@
-# UltimateSpotter v0.1
+# UltimateSpotter v0.2
 # Created by Davinium
 #
-# Base code from Stereo's Spotter App
+# //Base code from Stereo's Spotter App
+# Base code from HeliCorsa
 #
 # Some code from AE86SpeedChime and RpmBeeper by Klayking and TKu, respectively
 #
@@ -20,11 +21,15 @@
 #
 
 import ac, acsys
+
 import sys
 import math
 import configparser , platform , os , os.path , traceback
 import time
 import random
+import clock
+
+import opponent
 
 if platform.architecture()[0] == "64bit":
 	libdir = 'UltimateSpotter_dll_x64'
@@ -80,6 +85,16 @@ lapReset = False
 minReset = False
 secReset = False
 
+track = ""
+cars = []
+nearcars = []
+player = None
+
+lastDriverCheck = 0
+updateThreshhold = 0.3
+beginTime = time.clock()
+now = beginTime
+
 
 def acMain(ac_version):
 	global mainLabel, audioSpinner, audioLabel, audioList, audioVolSpinner, enableCheck, replayEnableCheck, app
@@ -123,10 +138,23 @@ def acMain(ac_version):
 	ac.addOnValueChangeListener(audioVolSpinner,onAudioVolSpin)
 	ac.log("SPOTTER: UI Loaded")
 
+	ac.log("SPOTTER: Loading Session Info...")
+	track = ac.getTrackName(0)
+	carIds = range(0,ac.getCarsCount(),1)
+	for carId in carIds:
+		carModel = str(ac.getCarName(carId))
+		if carModel == '-1': break
+		else:
+			maxSlotId = carId
+			driverName = ac.getDriverName(carId)
+			cars.append()
+
+
+
 def acUpdate(dt):
-	global lapReset
-	global minReset
-	global secReset
+	global lapReset, minReset, secReset
+	global lastTimeUpdate, now
+	now = time.clock()
 	#speed = ac.getCarState(0, acsys.CS.SpeedKMH)
 	#if speed > 105 and ac.getCarName(0) == "ks_toyota_ae86" and ac.isCameraOnBoard(0):
 	#	sound.play(os.path.join(os.path.dirname(__file__), "audio//JJPack//n37.wav"))		
@@ -157,6 +185,12 @@ def acUpdate(dt):
 			lapReset = False
 			secReset = False
 			minReset = False
+
+	if lastTimeUpdate == 0 || now - lastTimeUpdate > updateThreshhold:
+		lastTimeUpdate = now
+		checkForNewDrivers()
+		calcWorldPos(0)
+
 			
 
 #def on_click_toggle(*args):
@@ -170,9 +204,6 @@ def readAudio (section, toFind):
 	return random.choice(config[section][toFind].split(","))
 
 def sayTime (unit, time):
-	#sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS","1")))
-	#sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS","0")))
-	#sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS",time)))
 	if unit == "m":
 		#ac.log(str((time/(1000*60))%60))
 		sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS",str((time//(1000*60))%60))))
@@ -213,4 +244,14 @@ def onEnableCheck (label, val):
 	return 0
 
 def onReplayEnableCheck (label,val):
+	return 0
+
+def checkForNewDrivers():
+	return 0
+
+def calcWorldPos(0):
+	global nearcars, player
+	nearcars = []
+	player = cars[ac.getFocusedCar()]
+	player.calcPlayer()
 	return 0
