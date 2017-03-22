@@ -268,11 +268,11 @@ def calcWorldPos(): #distthresh 30
 	player.calcPlayer()
 	playerVectorReversed = euclid.Vector2(player.currentVelVec.x * -1,player.currentVelVec.y*-1)
 	player.calcDrawingInformation(playerVectorReversed)
-	ac.log("SPOTTER: Player calculated.")
 	for car in cars:
+		car.calcPlayer()
 		car.calc(player)
-		if car.playerDist < 30 and car != player:
+		if car.playerDist < 30 and car.playerDist > 1 and car != player:
+			ac.log("SPOTTER: Car nearby!!")
 			car.calcDrawingInformation(playerVectorReversed)
 			self.nearcars.append(car)
-			ac.log("SPOTTER: Car nearby!!")
-			ac.log("SPOTTER: Car nearby! {0} is at {1}, {2} meters away.".format(car.name,car.currentWorldPos,car.relativePos))
+			#ac.log("SPOTTER: Car nearby! {0} is at {1}, {2} meters away.".format(car.name,car.currentWorldPos,car.relativePos))

@@ -64,7 +64,7 @@ class Opponent (object):
 			self.playerDist = player.currentWorldPos.distance(euclid.Point2(x,z))
 
 	def calcDrawingInformation (self, playerVectorReversed):
-		if self.id != 0:
+		if self.idd != 0:
 			angle = math.atan2(-1,0)-math.atan(playerVectorReversed.y,playerVectorReversed.x)
 			angleD = angle * 360 / (2*math.pi)
 			angleR = angleD * math.pi/180
