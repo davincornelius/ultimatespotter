@@ -1,7 +1,6 @@
-import ac
-import acsys
+import ac, acsys
 import math
-from UltimateSpotter_third_party.sound_player import euclid
+from UltimateSpotter_third_party import euclid
 
 carLength = 4.3
 carWidth = 1.8
@@ -26,7 +25,7 @@ class Opponent (object):
 		self.name = name
 		self.idd = idd
 		self.model = model
-		ac.log("SPOTTER: OPPONENT INIT {}: {} driving {}"(self.idd,self.name,self.model))
+		#ac.log("SPOTTER: OPPONENT INIT {}: {} driving {}"(self.idd,self.name,self.model))
 
 	def checkForNewDriver(self):
 		acname = ac.getDriverName(self.idd)

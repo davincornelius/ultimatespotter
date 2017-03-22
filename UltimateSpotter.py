@@ -26,7 +26,7 @@ import ac, acsys
 import sys
 import math
 import configparser , platform , os , os.path , traceback
-import time, random, clock
+import time, random
 
 import opponent
 
@@ -38,7 +38,7 @@ else:
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), libdir))
 os.environ['PATH'] = os.environ['PATH'] + ";."
 
-
+from UltimateSpotter_third_party import euclid
 from UltimateSpotter_third_party.sim_info import SimInfo
 from UltimateSpotter_third_party.sound_player import SoundPlayer
 
@@ -97,6 +97,7 @@ now = beginTime
 
 def acMain(ac_version):
 	global mainLabel, audioSpinner, audioLabel, audioList, audioVolSpinner, enableCheck, replayEnableCheck, app
+	global track, cars
 	app = ac.newApp ("Ultimate Spotter Settings")
 	ac.log ("SPOTTER: Initializing UI...")
 
@@ -135,31 +136,31 @@ def acMain(ac_version):
 	ac.setRange(audioVolSpinner,1,10)
 	ac.setValue(audioVolSpinner,audioVol)
 	ac.addOnValueChangeListener(audioVolSpinner,onAudioVolSpin)
-	ac.log("SPOTTER: UI Loaded")
+	ac.log("SPOTTER: UI Loaded.")
 
 	ac.log("SPOTTER: Loading Session Info...")
 	track = ac.getTrackName(0)
+	ac.log("SPOTTER: Track Info Loaded.")
 	carIds = range(0,ac.getCarsCount(),1)
+	ac.log("SPOTTER: Car Info Loaded.")
 	for carId in carIds:
 		carModel = str(ac.getCarName(carId))
-		if carModel == '-1': break
+		#ac.log("SPOTTER: Loading Car...")
+		if carModel == '-1':
+			break
 		else:
 			maxSlotId = carId
 			driverName = ac.getDriverName(carId)
-			cars.append()
+			cars.append(opponent.Opponent(carId,driverName,carModel))
+			#ac.log("SPOTTER: Loaded Car.")
+	ac.log("SPOTTER: Session Info Loading Complete.")
 
 
 
 def acUpdate(dt):
 	global lapReset, minReset, secReset
-	global lastTimeUpdate, now
-	now = time.clock()
-	#speed = ac.getCarState(0, acsys.CS.SpeedKMH)
-	#if speed > 105 and ac.getCarName(0) == "ks_toyota_ae86" and ac.isCameraOnBoard(0):
-	#	sound.play(os.path.join(os.path.dirname(__file__), "audio//JJPack//n37.wav"))		
-	#else:
-	#	sound.stop()
-
+	#global lastTimeUpdate, now
+	#now = time.clock()
 	#racing with enabled or watching replay with replayenabled and enabled
 	if (USEnabled and sim_info.graphics.status == 2) or (sim_info.graphics.status == 1 and USReplayEnabled and USEnabled):
 		if ac.getCarState(0, acsys.CS.LapTime) > 0 and ac.getCarState(0, acsys.CS.LapTime) < 50 and lapReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
@@ -184,13 +185,25 @@ def acUpdate(dt):
 			lapReset = False
 			secReset = False
 			minReset = False
+		#ac.log ("SPOTTER: Time: " + now)
+		if ac.getCarState(0,acsys.CS.LapTime) % 100 == 0:
+			ac.log("SPOTTER: Calculating...")
+			calcWorldPos()
 
-	if lastTimeUpdate == 0 or now - lastTimeUpdate > updateThreshhold:
-		lastTimeUpdate = now
-		#checkForNewDrivers()
-		calcWorldPos()
 
-			
+#def onFormRender(dt):
+#	global lastTimeUpdate
+#	now = time.clock();
+#	if ((lastTimeUpdate == 0) or (now - lastTimeUpdate > updateThreshhold)):
+#		lastTimeUpdate = now
+#		calculate()
+#		#ac.log("SPOTTER: Calculating positions...")
+#		#checkForNewDrivers()
+#		#calcWorldPos()
+
+def calculate():
+	ac.log("SPOTTER: Calculating...")
+	calcWorldPos()
 
 #def on_click_toggle(*args):
     # global beeperEnabled
@@ -255,10 +268,11 @@ def calcWorldPos(): #distthresh 30
 	player.calcPlayer()
 	playerVectorReversed = euclid.Vector2(player.currentVelVec.x * -1,player.currentVelVec.y*-1)
 	player.calcDrawingInformation(playerVectorReversed)
-
+	ac.log("SPOTTER: Player calculated.")
 	for car in cars:
 		car.calc(player)
 		if car.playerDist < 30 and car != player:
 			car.calcDrawingInformation(playerVectorReversed)
 			self.nearcars.append(car)
+			ac.log("SPOTTER: Car nearby!!")
 			ac.log("SPOTTER: Car nearby! {0} is at {1}, {2} meters away.".format(car.name,car.currentWorldPos,car.relativePos))
