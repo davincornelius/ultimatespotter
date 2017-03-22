@@ -1,8 +1,8 @@
 # UltimateSpotter v0.2
 # Created by Davinium
 #
-# //Base code from Stereo's Spotter App
-# Base code from HeliCorsa
+# Inspiration from Stereo's Spotter App
+# Base code from Minolin's HeliCorsa
 #
 # Some code from AE86SpeedChime and RpmBeeper by Klayking and TKu, respectively
 #
@@ -13,6 +13,7 @@
 #  http://www.assettocorsa.net/forum/index.php?threads/audible-gear-shift-beep.14237/
 #  http://www.assettocorsa.net/forum/index.php?threads/app-request.7234/#post-103371
 #  http://www.assettocorsa.net/forum/index.php?threads/ae86-speed-chime-app.41318/
+#  http://www.assettocorsa.net/forum/index.php?threads/helicorsa-radar-app.20223/
 #
 #
 # Installation:
@@ -25,9 +26,7 @@ import ac, acsys
 import sys
 import math
 import configparser , platform , os , os.path , traceback
-import time
-import random
-import clock
+import time, random, clock
 
 import opponent
 
@@ -186,10 +185,10 @@ def acUpdate(dt):
 			secReset = False
 			minReset = False
 
-	if lastTimeUpdate == 0 || now - lastTimeUpdate > updateThreshhold:
+	if lastTimeUpdate == 0 or now - lastTimeUpdate > updateThreshhold:
 		lastTimeUpdate = now
-		checkForNewDrivers()
-		calcWorldPos(0)
+		#checkForNewDrivers()
+		calcWorldPos()
 
 			
 
@@ -249,9 +248,17 @@ def onReplayEnableCheck (label,val):
 def checkForNewDrivers():
 	return 0
 
-def calcWorldPos(0):
+def calcWorldPos(): #distthresh 30
 	global nearcars, player
 	nearcars = []
 	player = cars[ac.getFocusedCar()]
 	player.calcPlayer()
-	return 0
+	playerVectorReversed = euclid.Vector2(player.currentVelVec.x * -1,player.currentVelVec.y*-1)
+	player.calcDrawingInformation(playerVectorReversed)
+
+	for car in cars:
+		car.calc(player)
+		if car.playerDist < 30 and car != player:
+			car.calcDrawingInformation(playerVectorReversed)
+			self.nearcars.append(car)
+			ac.log("SPOTTER: Car nearby! {0} is at {1}, {2} meters away.".format(car.name,car.currentWorldPos,car.relativePos))
