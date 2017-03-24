@@ -186,7 +186,7 @@ def acUpdate(dt):
 			secReset = False
 			minReset = False
 		#ac.log ("SPOTTER: Time: " + now)
-		if ac.getCarState(0,acsys.CS.LapTime) % 100 == 0:
+		if ac.getCarState(0,acsys.CS.LapTime) % 100 < 1:
 			ac.log("SPOTTER: Calculating...")
 			calcWorldPos()
 
@@ -261,18 +261,18 @@ def onReplayEnableCheck (label,val):
 def checkForNewDrivers():
 	return 0
 
-def calcWorldPos(): #distthresh 30
+#distthresh 30
+def calcWorldPos():
 	global nearcars, player
 	nearcars = []
 	player = cars[ac.getFocusedCar()]
 	player.calcPlayer()
 	playerVectorReversed = euclid.Vector2(player.currentVelVec.x * -1,player.currentVelVec.y*-1)
-	player.calcDrawingInformation(playerVectorReversed)
+	#player.calcDrawingInformation(playerVectorReversed)
 	for car in cars:
-		car.calcPlayer()
 		car.calc(player)
 		if car.playerDist < 30 and car.playerDist > 1 and car != player:
 			ac.log("SPOTTER: Car nearby!!")
 			car.calcDrawingInformation(playerVectorReversed)
-			self.nearcars.append(car)
-			#ac.log("SPOTTER: Car nearby! {0} is at {1}, {2} meters away.".format(car.name,car.currentWorldPos,car.relativePos))
+			nearcars.append(car)
+			ac.log("SPOTTER: Car " + car.idd + " is at " + car.relativePos.x + ", " + car.relativePos.y)

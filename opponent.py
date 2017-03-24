@@ -49,8 +49,11 @@ class Opponent (object):
 	def calc(self,player):
 		if self == player:
 			return
+		self.currentSpeed = ac.getCarState(self.idd,acsys.CS.SpeedKMH)
 		if self.currentSpeed < 1:
 			self.currentSpeed = 0.0
+			shouldBeCalled = False
+		elif ac.isCarInPitlane(self.idd) or ac.isCarInPit(self.idd):
 			shouldBeCalled = False
 		else:
 			shouldBeCalled = True
@@ -64,13 +67,15 @@ class Opponent (object):
 			self.playerDist = player.currentWorldPos.distance(euclid.Point2(x,z))
 
 	def calcDrawingInformation (self, playerVectorReversed):
-		if self.idd != 0:
-			angle = math.atan2(-1,0)-math.atan(playerVectorReversed.y,playerVectorReversed.x)
-			angleD = angle * 360 / (2*math.pi)
-			angleR = angleD * math.pi/180
-			cosTheta = math.cos(angleR)
-			sinTheta = math.sin(angleR)
-			x = cosTheta * self.relativePos.x - sinTheta * self.relativePos.y
-			y = sinTheta * self.relativePos.x + cosTheta * self.relativePos.y
-
-			#self.centerPosition = euclid.Point2(x,y);
+		angle =  math.atan2(-1, 0) - math.atan2(playerVectorReversed.y, playerVectorReversed.x)
+		ac.log("ITS NOT YOU??")
+		angleD = angle * 360 / (2*math.pi)
+		ac.log("ITS NOT YOU!?")
+		angleR = angleD * math.pi/180
+		ac.log("ITS NOT YOU!!")
+		cosTheta = math.cos(angleR)
+		ac.log("ITS NOT YOU!!")
+		sinTheta = math.sin(angleR)
+		ac.log("SPOTTER: Calculated Drawing Information")
+		x = cosTheta * self.relativePos.x - sinTheta * self.relativePos.y
+		y = sinTheta * self.relativePos.x + cosTheta * self.relativePos.y
