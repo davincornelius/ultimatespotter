@@ -21,6 +21,9 @@ class Opponent (object):
 
 	shouldBeCalled = False
 
+	rightside = False
+	leftside = False
+
 	def __init__ (self,idd,name,model):
 		self.name = name
 		self.idd = idd
@@ -49,8 +52,8 @@ class Opponent (object):
 	def calc(self,player):
 		if self == player:
 			return
-		self.currentSpeed = ac.getCarState(self.idd,acsys.CS.SpeedKMH)
-		if self.currentSpeed < 1:
+		speed = ac.getCarState(self.idd,acsys.CS.SpeedKMH)
+		if speed < 1:
 			self.currentSpeed = 0.0
 			shouldBeCalled = False
 		elif ac.isCarInPitlane(self.idd) or ac.isCarInPit(self.idd):
@@ -60,22 +63,24 @@ class Opponent (object):
 			x, y, z = ac.getCarState(self.idd, acsys.CS.WorldPosition)
 			self.currentWorldPos = euclid.Point2(x,z)
 			f, u, l = ac.getCarState(self.idd, acsys.CS.Velocity)
-			self.currentVelVec = euclid.Vector2(f,l).normalize()
-			self.laps = ac.getCarState()
+			self.currentVelVec = euclid.Vector2(f,1).normalize()
+			self.laps = ac.getCarState(self.idd,acsys.CS.LapCount)
 			self.splineposition = ac.getCarState(self.idd,acsys.CS.NormalizedSplinePosition)
 			self.relativePos = euclid.Point2(x-player.currentWorldPos.x, z - player.currentWorldPos.y)
 			self.playerDist = player.currentWorldPos.distance(euclid.Point2(x,z))
 
 	def calcDrawingInformation (self, playerVectorReversed):
 		angle =  math.atan2(-1, 0) - math.atan2(playerVectorReversed.y, playerVectorReversed.x)
-		ac.log("ITS NOT YOU??")
 		angleD = angle * 360 / (2*math.pi)
-		ac.log("ITS NOT YOU!?")
 		angleR = angleD * math.pi/180
-		ac.log("ITS NOT YOU!!")
 		cosTheta = math.cos(angleR)
-		ac.log("ITS NOT YOU!!")
 		sinTheta = math.sin(angleR)
-		ac.log("SPOTTER: Calculated Drawing Information")
 		x = cosTheta * self.relativePos.x - sinTheta * self.relativePos.y
 		y = sinTheta * self.relativePos.x + cosTheta * self.relativePos.y
+		if math.fabs(y) < carLength*0.8:
+			if -x > 0:
+				ac.log("CAR RIGHT")
+				self.rightside = True
+			else:
+				ac.log("CAR LEFT")
+				self.leftside = True

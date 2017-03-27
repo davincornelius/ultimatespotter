@@ -94,6 +94,9 @@ updateThreshhold = 0.3
 beginTime = time.clock()
 now = beginTime
 
+rightside = False
+leftside = False
+
 
 def acMain(ac_version):
 	global mainLabel, audioSpinner, audioLabel, audioList, audioVolSpinner, enableCheck, replayEnableCheck, app
@@ -163,17 +166,17 @@ def acUpdate(dt):
 	#now = time.clock()
 	#racing with enabled or watching replay with replayenabled and enabled
 	if (USEnabled and sim_info.graphics.status == 2) or (sim_info.graphics.status == 1 and USReplayEnabled and USEnabled):
-		if ac.getCarState(0, acsys.CS.LapTime) > 0 and ac.getCarState(0, acsys.CS.LapTime) < 50 and lapReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
+		if ac.getCarState(0, acsys.CS.LapTime) > 100 and ac.getCarState(0, acsys.CS.LapTime) < 150 and lapReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
 			lapReset = True
 			sayTime ("m", ac.getCarState(0,acsys.CS.LastLap))
 			#sayTime ("0")
-		elif ac.getCarState(0,acsys.CS.LapTime) > 750 and ac.getCarState(0, acsys.CS.LapTime) < 800 and lapReset == True and minReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
+		elif ac.getCarState(0,acsys.CS.LapTime) > 850 and ac.getCarState(0, acsys.CS.LapTime) < 900 and lapReset == True and minReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
 			if (ac.getCarState(0,acsys.CS.LastLap)/1000)%60 < 10:
 				sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS","0")))
 			sayTime ("s",ac.getCarState(0,acsys.CS.LastLap))
 			minReset = True
 
-		elif ac.getCarState(0,acsys.CS.LapTime) > 2150 and ac.getCarState(0, acsys.CS.LapTime) < 2200 and lapReset == True and minReset == True and secReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
+		elif ac.getCarState(0,acsys.CS.LapTime) > 2250 and ac.getCarState(0, acsys.CS.LapTime) < 2300 and lapReset == True and minReset == True and secReset == False and ac.getCarState(0,acsys.CS.LastLap) > 1000:
 			secReset = True
 			if random.choice((True, False)) and (ac.getCarState(0,acsys.CS.LastLap)/10)%100 > 10:
 				sayTime ("ths",ac.getCarState(0,acsys.CS.LastLap))
@@ -263,7 +266,9 @@ def checkForNewDrivers():
 
 #distthresh 30
 def calcWorldPos():
-	global nearcars, player
+	global nearcars, player, leftside, rightside
+	leftside = False
+	rightside = False
 	nearcars = []
 	player = cars[ac.getFocusedCar()]
 	player.calcPlayer()
@@ -275,4 +280,13 @@ def calcWorldPos():
 			ac.log("SPOTTER: Car nearby!!")
 			car.calcDrawingInformation(playerVectorReversed)
 			nearcars.append(car)
-			ac.log("SPOTTER: Car " + car.idd + " is at " + car.relativePos.x + ", " + car.relativePos.y)
+			if car.rightside:
+				rightside = True
+			if car.leftside:
+				leftside = True
+	if rightside:
+		sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS","1")))
+	if leftside:
+		sound.queue(os.path.join(os.path.dirname(__file__), "audio//JJPack//" + readAudio("NUMBERS","2")))
+
+					
